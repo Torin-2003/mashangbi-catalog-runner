@@ -1,0 +1,46 @@
+name: Catalog
+on:
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+  workflow_dispatch:
+    inputs:
+      recovery_generation:
+        description: 'Only renew private read access for this paused generation; no collection or deployment'
+        required: false
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: catalog-production
+  cancel-in-progress: false
+jobs:
+  catalog:
+    if: github.ref == 'refs/heads/main' && (vars.CATALOG_RUNNER_ENABLED == '1' || (github.event_name == 'workflow_dispatch' && inputs.recovery_generation != ''))
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    environment: production
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.19.0'
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: node loader.mjs
+        timeout-minutes: 30
+        env:
+          CATALOG_RUNNER_CODE_SHA256: ${{ vars.CATALOG_RUNNER_CODE_SHA256 }}
+          CATALOG_RECOVERY_GENERATION: ${{ inputs.recovery_generation }}
+          CATALOG_CONTROL_URL: ${{ vars.CATALOG_CONTROL_URL }}
+          CATALOG_ASSET_ORIGIN: ${{ vars.CATALOG_ASSET_ORIGIN }}
+          CATALOG_CONTROL_TOKEN: ${{ secrets.CATALOG_CONTROL_TOKEN }}
+          CATALOG_CHECKPOINT_KEY: ${{ secrets.CATALOG_CHECKPOINT_KEY }}
+          CATALOG_PROXY_GROUPS: ${{ secrets.CATALOG_PROXY_GROUPS }}
+          CATALOG_STATE_APP_ID: ${{ vars.CATALOG_STATE_APP_ID }}
+          CATALOG_STATE_INSTALLATION_ID: ${{ vars.CATALOG_STATE_INSTALLATION_ID }}
+          CATALOG_STATE_REPOSITORY_ID: ${{ vars.CATALOG_STATE_REPOSITORY_ID }}
+          CATALOG_STATE_REPOSITORY: ${{ vars.CATALOG_STATE_REPOSITORY }}
+          CATALOG_STATE_APP_PRIVATE_KEY: ${{ secrets.CATALOG_STATE_APP_PRIVATE_KEY }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CATALOG_ASSETS_DEPLOY_TOKEN }}

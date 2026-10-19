@@ -1,0 +1,12 @@
+{
+  "name": "mashangbi-catalog-runner",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "dependencies": {
+    "undici": "8.11.2",
+    "wrangler": "4.118.0"
+  }
+}
