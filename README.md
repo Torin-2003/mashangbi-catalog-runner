@@ -1,4 +1,4 @@
-# Quanshangbi Catalog Runner
+# Mashangbi Catalog Runner
 
 This repository contains only a small loader, the workflow and dependency manifests. It contains no business logic, website authentication, payment server, database backups or credentials.
 
@@ -12,7 +12,7 @@ The workflow is disabled until repository variable `CATALOG_RUNNER_ENABLED` is `
 
 Provision the variables and secrets named in `.github/workflows/catalog.yml`. `CATALOG_CHECKPOINT_KEY` is a 32-byte key encoded as 64 hexadecimal characters. The GitHub App must be installed only on the private state repository, with contents access. The asset deployment token must be scoped for the approved Cloudflare account and must not be a personal CLI/OAuth token. An empty proxy configuration means direct transport only; unknown requested proxy groups fail closed.
 
-Before publishing this generated package, create and review its dependency lockfile with `npm install --package-lock-only --ignore-scripts`. The workflow installs the locked dependencies without lifecycle scripts. Never add production secrets to test branches or untrusted workflows.
+The build includes the reviewed dependency lockfile from `scripts/catalog-runner/package-lock.json`. When changing dependencies, regenerate that template with `npm install --package-lock-only --ignore-scripts` against the generated package manifest and review the registry URLs and integrity hashes. The workflow installs the locked dependencies without lifecycle scripts. Never add production secrets to test branches or untrusted workflows.
 
 ## Operations
 
